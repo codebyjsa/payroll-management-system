@@ -24,23 +24,19 @@ mark_attendance() {
     fi
 
     if grep -q "^${CURRENT_DATE}," "$FILE" 2>/dev/null; then
-        echo "--------------------------------------------"
         echo " Attendance already marked for $USER_ID"
         echo " Date : $CURRENT_DATE"
-        # Extract and display existing record
+        
         local EXISTING
         EXISTING=$(grep "^${CURRENT_DATE}," "$FILE")
         echo " Record: $EXISTING"
-        echo "--------------------------------------------"
         return 0
     fi
 
-    echo "--------------------------------------------"
     echo "  Mark Attendance"
     echo "  User   : $USER_ID"
     echo "  Date   : $CURRENT_DATE"
     echo "  Time   : $CURRENT_TIME"
-    echo "--------------------------------------------"
     echo "Enter Status:"
     echo "  1) Present"
     echo "  2) Absent"
@@ -59,13 +55,11 @@ mark_attendance() {
 
     echo "${CURRENT_DATE},${CURRENT_TIME},${STATUS}" >> "$FILE"
 
-    echo "--------------------------------------------"
     echo " [SUCCESS] Attendance marked!"
     echo "  User   : $USER_ID"
     echo "  Date   : $CURRENT_DATE"
     echo "  Time   : $CURRENT_TIME"
     echo "  Status : $STATUS"
-    echo "--------------------------------------------"
     return 0
 }
 
@@ -93,21 +87,16 @@ view_attendance() {
     PRESENT=$(tail -n +2 "$FILE" | grep -c ",Present$" || true)
     ABSENT=$(tail -n +2 "$FILE" | grep -c ",Absent$" || true)
 
-    echo "============================================"
     echo "  Attendance Report — User: $USER_ID"
-    echo "============================================"
     printf "%-15s %-12s %-10s\n" "Date" "Time" "Status"
-    echo "--------------------------------------------"
 
     while IFS=',' read -r DATE TIME STATUS; do
         printf "%-15s %-12s %-10s\n" "$DATE" "$TIME" "$STATUS"
     done < <(tail -n +2 "$FILE")
 
-    echo "============================================"
     echo "  Summary:"
     echo "    Total Days Recorded : $TOTAL"
     echo "    Present             : $PRESENT"
     echo "    Absent              : $ABSENT"
-    echo "============================================"
     return 0
 }
