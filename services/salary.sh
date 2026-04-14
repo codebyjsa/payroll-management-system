@@ -79,7 +79,7 @@ generate_payslip() {
         echo "---------------------------"
     } > "$PAYSLIP_FILE"
 
-
+}
 # -------- MAIN PROGRAM --------
 echo "Processing Salary..."
 
