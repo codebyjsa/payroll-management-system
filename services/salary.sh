@@ -1,28 +1,35 @@
 #!/bin/bash
 
-# -------- USER DETAILS --------
-USER_ID="1"
-USER_ROLE="employee"
+read -p "Enter User ID: " USER_ID
+
 PER_DAY_SALARY=500
 
-# -------- FILE PATHS --------
 ATT_FILE="data/attendance/$USER_ID.csv"
 SAL_FILE="data/salary.csv"
+PAYSLIP_FILE="payslips/${USER_ID}_salary_report.txt"
 
+# get user role from users.csv
+USER_ROLE=$(grep "^$USER_ID," data/users.csv | cut -d',' -f3)
 
-# -------- FUNCTION 1: CHECK DATE --------
+# check if user exists
+if [ -z "$USER_ROLE" ]
+then
+    echo "User not found!"
+    exit 1
+fi
 check_date() {
     d=$(date +%d)
 
-    if [ $d != 07 ]
+    if [ $d != 14 ]
     then
         echo "Salary can only be generated on 7th"
-        # exit   # disabled for testing
-    fi
+        
+        exit 1 
+     fi
 }
 
 
-# -------- FUNCTION 2: CALCULATE SALARY --------
+
 calculate_salary() {
 
     # check file exists
@@ -53,20 +60,24 @@ calculate_salary() {
 }
 
 
-# -------- FUNCTION 3: GENERATE PAYSLIP --------
 generate_payslip() {
 
-    echo "---------------------------"
-    echo "        PAYSLIP            "
-    echo "---------------------------"
-    echo "User ID      : $USER_ID"
-    echo "User Role    : $USER_ROLE"
-    echo "Present Days : $present"
-    echo "Absent Days  : $absent"
-    echo "Per Day Pay  : ₹$PER_DAY_SALARY"
-    echo "Total Salary : ₹$salary"
-    echo "---------------------------"
-}
+    mkdir -p payslips
+
+    
+
+    {
+        echo "---------------------------"
+        echo "        PAYSLIP            "
+        echo "---------------------------"
+        echo "User ID      : $USER_ID"
+        echo "User Role    : $USER_ROLE"
+        echo "Present Days : $present"
+        echo "Absent Days  : $absent"
+        echo "Per Day Pay  : ₹$PER_DAY_SALARY"
+        echo "Total Salary : ₹$salary"
+        echo "---------------------------"
+    } > "$PAYSLIP_FILE"
 
 
 # -------- MAIN PROGRAM --------
