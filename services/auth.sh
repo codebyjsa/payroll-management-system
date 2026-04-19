@@ -10,13 +10,11 @@ USER_FILE="$BASE_DIR/data/users.csv"
 USER_ID=""
 USER_ROLE=""
 
-# -------------------------------
-# Function: check_user
-# -------------------------------
+
 check_user() {
     local INPUT_ID="$1"
 
-    # Check file
+    # Check file exists
     if [[ ! -f "$USER_FILE" ]]; then
         echo "[ERROR] User file not found!"
         return 1
@@ -26,6 +24,7 @@ check_user() {
     local RECORD
     RECORD=$(tail -n +2 "$USER_FILE" | tr -d ' ' | grep "^${INPUT_ID},")
 
+    # If not found
     if [[ -z "$RECORD" ]]; then
         return 1
     fi
@@ -34,48 +33,57 @@ check_user() {
     local ID NAME ROLE
     IFS=',' read -r ID NAME ROLE <<< "$RECORD"
 
+    # Return role
     echo "$ROLE"
     return 0
 }
 
-# -------------------------------
-# Function: login_user
-# -------------------------------
+
 login_user() {
     echo "====== LOGIN SYSTEM ======"
 
     while true; do
-        echo -n "Enter Name (or type 'exitnow'): "
-        read -r NAME
-
-        if [[ "$NAME" == "exitnow" ]]; then
-            echo "[INFO] Exit"
-            return 1
-        fi
-
-        echo -n "Enter User ID: "
+        echo -n "Enter User ID (or type 'exitnow'): "
         read -r INPUT_ID
 
+        # Exit condition
         if [[ "$INPUT_ID" == "exitnow" ]]; then
             echo "[INFO] Exit"
             return 1
         fi
 
+        # Check user
         ROLE=$(check_user "$INPUT_ID")
 
-        if [[ $? -eq 0 ]]; then
-            USER_ID="$INPUT_ID"
-            USER_ROLE="$ROLE"
-
-            echo "Login successful!"
-            echo "User ID : $USER_ID"
-            echo "Role    : $USER_ROLE"
-            return 0
-        else
+        if [[ $? -ne 0 ]]; then
             echo " Invalid User ID. Try again!"
+            continue
+        fi
+
+        # Save global values
+        USER_ID="$INPUT_ID"
+        USER_ROLE="$ROLE"
+
+        echo "Login successful!"
+        echo "User ID : $USER_ID"
+        echo "Role    : $USER_ROLE"
+
+        # Role check
+        if [[ "$USER_ROLE" == "admin" ]]; then
+            echo " Access granted (Admin)"
+            return 0
+
+        elif [[ "$USER_ROLE" == "employee" ]]; then
+            echo " You don't have authority!"
+            echo " Redirecting to login again..."
+            continue
+
+        else
+            echo " Unknown role! Try again."
+            continue
         fi
     done
 }
 
-# Auto run
+
 login_user
