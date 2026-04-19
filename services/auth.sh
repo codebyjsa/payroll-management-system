@@ -10,9 +10,12 @@ USER_FILE="$BASE_DIR/data/users.csv"
 USER_ID=""
 USER_ROLE=""
 
-
+# -------------------------------
+# Function: check_user
+# -------------------------------
 check_user() {
     local INPUT_ID="$1"
+    local INPUT_NAME="$2"
 
     # Check file exists
     if [[ ! -f "$USER_FILE" ]]; then
@@ -20,11 +23,11 @@ check_user() {
         return 1
     fi
 
-    # Skip header + remove spaces
+    # Find record (skip header, remove spaces)
     local RECORD
     RECORD=$(tail -n +2 "$USER_FILE" | tr -d ' ' | grep "^${INPUT_ID},")
 
-    # If not found
+    # If ID not found
     if [[ -z "$RECORD" ]]; then
         return 1
     fi
@@ -33,12 +36,19 @@ check_user() {
     local ID NAME ROLE
     IFS=',' read -r ID NAME ROLE <<< "$RECORD"
 
+    # Check name match
+    if [[ "$NAME" != "$INPUT_NAME" ]]; then
+        return 1
+    fi
+
     # Return role
     echo "$ROLE"
     return 0
 }
 
-
+# -------------------------------
+# Function: login_user
+# -------------------------------
 login_user() {
     echo "====== LOGIN SYSTEM ======"
 
@@ -52,11 +62,14 @@ login_user() {
             return 1
         fi
 
+        echo -n "Enter Name: "
+        read -r INPUT_NAME
+
         # Check user
-        ROLE=$(check_user "$INPUT_ID")
+        ROLE=$(check_user "$INPUT_ID" "$INPUT_NAME")
 
         if [[ $? -ne 0 ]]; then
-            echo " Invalid User ID. Try again!"
+            echo " Invalid ID or Name. Try again!"
             continue
         fi
 
@@ -85,5 +98,7 @@ login_user() {
     done
 }
 
-
+# -------------------------------
+# MAIN
+# -------------------------------
 login_user
