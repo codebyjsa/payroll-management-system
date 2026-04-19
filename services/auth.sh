@@ -10,9 +10,7 @@ USER_FILE="$BASE_DIR/data/users.csv"
 USER_ID=""
 USER_ROLE=""
 
-# -------------------------------
-# Function: check_user
-# -------------------------------
+
 check_user() {
     local INPUT_ID="$1"
     local INPUT_NAME="$2"
@@ -46,9 +44,7 @@ check_user() {
     return 0
 }
 
-# -------------------------------
-# Function: login_user
-# -------------------------------
+
 login_user() {
     echo "====== LOGIN SYSTEM ======"
 
