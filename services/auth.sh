@@ -49,21 +49,29 @@ login_user() {
     echo "====== LOGIN SYSTEM ======"
 
     while true; do
-        echo -n "Enter User ID (or type 'exitnow'): "
+        echo -n "Enter User ID : "
         read -r INPUT_ID
+        echo -n "Enter User Name: "
+        read -r INPUT_NAME
+        
+         # Check user
+        ROLE=$(check_user "$INPUT_ID" "$INPUT_NAME")
+        # if role == admin then ask for exit
+if [[ "$ROLE" == "admin" ]]; then
+    echo -n "Do you want to exit? (y/n): "
+    read -r CHOICE
+
+    if [[ "$CHOICE" == "y" ]]; then
+        return 0
+    fi
+fi
 
         # Exit condition
-        if [[ "$INPUT_ID" == "exitnow" ]]; then
-            echo "[INFO] Exit"
-            return 1
-        fi
+    
 
-        echo -n "Enter Name: "
-        read -r INPUT_NAME
 
-        # Check user
-        ROLE=$(check_user "$INPUT_ID" "$INPUT_NAME")
 
+        
         if [[ $? -ne 0 ]]; then
             echo " Invalid ID or Name. Try again!"
             continue
@@ -75,6 +83,7 @@ login_user() {
 
         echo "Login successful!"
         echo "User ID : $USER_ID"
+        echo "User name : $INPUT_NAME"
         echo "Role    : $USER_ROLE"
 
         # Role check
@@ -83,9 +92,8 @@ login_user() {
             return 0
 
         elif [[ "$USER_ROLE" == "employee" ]]; then
-            echo " You don't have authority!"
-            echo " Redirecting to login again..."
-            continue
+            echo " Access granted (Employee)"
+            return 0
 
         else
             echo " Unknown role! Try again."
