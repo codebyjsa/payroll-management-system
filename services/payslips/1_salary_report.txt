@@ -1,0 +1,10 @@
+---------------------------
+        PAYSLIP            
+---------------------------
+User ID      : 1
+User Role    : admin
+Present Days : 2
+Absent Days  : 0
+Per Day Pay  : ₹500
+Total Salary : ₹1000
+---------------------------

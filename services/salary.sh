@@ -18,14 +18,13 @@ then
     exit 1
 fi
 check_date() {
-    d=$(date +%d)
+    read -p "Enter day (DD): " d
 
-    if [ $d != 14 ]
-    then
+    if [ "$d" != "7" ]; then
         echo "Salary can only be generated on 7th"
-        
         exit 1 
-     fi
+    fi
+}
 }
 
 
@@ -78,8 +77,13 @@ generate_payslip() {
         echo "Total Salary : ₹$salary"
         echo "---------------------------"
     } > "$PAYSLIP_FILE"
-
+    
+    echo ""
+    echo "----- Payslip Preview -----"
+    cat "$PAYSLIP_FILE"
 }
+
+
 # -------- MAIN PROGRAM --------
 echo "Processing Salary..."
 
