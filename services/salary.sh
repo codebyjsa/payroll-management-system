@@ -22,10 +22,10 @@ check_date() {
 
     if [ "$d" != "7" ]; then
         echo "Salary can only be generated on 7th"
-        exit 1 
+        exit 1
     fi
 }
-}
+
 
 
 
@@ -60,7 +60,9 @@ calculate_salary() {
 
 
 generate_payslip() {
-
+    MONTH=$(date +%B)
+    YEAR=$(date +%Y)
+    PAYSLIP_FILE="payslips/${USER_ID}_salary_${MONTH}_${YEAR}.txt"
     mkdir -p payslips
 
     
