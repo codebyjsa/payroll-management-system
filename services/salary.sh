@@ -18,7 +18,7 @@ SAL_FILE="data/salary.csv"
 check_date() {
     d=$(date +%d)
 
-    if [ $d != 14 ]
+    if [ $d != 07 ]
     then
         echo "Salary can only be generated on 7th"
         

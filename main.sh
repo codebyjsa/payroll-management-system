@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Move to the services directory where modules and data are located
 cd "$(dirname "$0")/services" || exit 1
-
-# Sourcing all modules to integrate them into a unified system
 source auth.sh
 source attendance.sh
 source salary.sh
