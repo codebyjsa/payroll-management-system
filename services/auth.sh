@@ -10,22 +10,22 @@ USER_FILE="$BASE_DIR/data/users.csv"
 USER_ID=""
 USER_ROLE=""
 
-# -------------------------------
-# Function: check_user
-# -------------------------------
+
 check_user() {
     local INPUT_ID="$1"
+    local INPUT_NAME="$2"
 
-    # Check file
+    # Check file exists
     if [[ ! -f "$USER_FILE" ]]; then
         echo "[ERROR] User file not found!"
         return 1
     fi
 
-    # Skip header + remove spaces
+    # Find record (skip header, remove spaces)
     local RECORD
     RECORD=$(tail -n +2 "$USER_FILE" | tr -d ' ' | grep "^${INPUT_ID},")
 
+    # If ID not found
     if [[ -z "$RECORD" ]]; then
         return 1
     fi
@@ -34,48 +34,75 @@ check_user() {
     local ID NAME ROLE
     IFS=',' read -r ID NAME ROLE <<< "$RECORD"
 
+    # Check name match
+    if [[ "$NAME" != "$INPUT_NAME" ]]; then
+        return 1
+    fi
+
+    # Return role
     echo "$ROLE"
     return 0
 }
 
-# -------------------------------
-# Function: login_user
-# -------------------------------
+
 login_user() {
     echo "====== LOGIN SYSTEM ======"
 
     while true; do
-        echo -n "Enter Name (or type 'exitnow'): "
-        read -r NAME
-
-        if [[ "$NAME" == "exitnow" ]]; then
-            echo "[INFO] Exit"
-            return 1
-        fi
-
-        echo -n "Enter User ID: "
+        echo -n "Enter User ID : "
         read -r INPUT_ID
+        echo -n "Enter User Name: "
+        read -r INPUT_NAME
+        
+         # Check user
+        ROLE=$(check_user "$INPUT_ID" "$INPUT_NAME")
+        # if role == admin then ask for exit
+if [[ "$ROLE" == "admin" ]]; then
+    echo -n "Do you want to exit? (y/n): "
+    read -r CHOICE
 
-        if [[ "$INPUT_ID" == "exitnow" ]]; then
-            echo "[INFO] Exit"
-            return 1
+    if [[ "$CHOICE" == "y" ]]; then
+        return 0
+    fi
+fi
+
+        # Exit condition
+    
+
+
+
+        
+        if [[ -z "$ROLE" ]]; then
+            echo " Invalid ID or Name. Try again!"
+            continue
         fi
 
-        ROLE=$(check_user "$INPUT_ID")
+        # Save global values
+        USER_ID="$INPUT_ID"
+        USER_ROLE="$ROLE"
 
-        if [[ $? -eq 0 ]]; then
-            USER_ID="$INPUT_ID"
-            USER_ROLE="$ROLE"
+        echo "Login successful!"
+        echo "User ID : $USER_ID"
+        echo "User name : $INPUT_NAME"
+        echo "Role    : $USER_ROLE"
 
-            echo "Login successful!"
-            echo "User ID : $USER_ID"
-            echo "Role    : $USER_ROLE"
+        # Role check
+        if [[ "$USER_ROLE" == "admin" ]]; then
+            echo " Access granted (Admin)"
             return 0
+
+        elif [[ "$USER_ROLE" == "employee" ]]; then
+            echo " Access granted (Employee)"
+            return 0
+
         else
-            echo " Invalid User ID. Try again!"
+            echo " Unknown role! Try again."
+            continue
         fi
     done
 }
 
-# Auto run
-login_user
+# MAIN
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    login_user
+fi

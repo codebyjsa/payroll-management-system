@@ -1,26 +1,29 @@
 #!/bin/bash
 
-read -p "Enter User ID: " USER_ID
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    read -p "Enter User ID: " USER_ID
+    # get user role from users.csv
+    USER_ROLE=$(grep "^$USER_ID," data/users.csv | cut -d',' -f3)
+
+    # check if user exists
+    if [ -z "$USER_ROLE" ]
+    then
+        echo "User not found!"
+        exit 1
+    fi
+fi
 
 PER_DAY_SALARY=500
-
-ATT_FILE="data/attendance/$USER_ID.csv"
 SAL_FILE="data/salary.csv"
-PAYSLIP_FILE="payslips/${USER_ID}_salary_report.txt"
-
-# get user role from users.csv
-USER_ROLE=$(grep "^$USER_ID," data/users.csv | cut -d',' -f3)
-
-# check if user exists
-if [ -z "$USER_ROLE" ]
-then
-    echo "User not found!"
-    exit 1
-fi
 check_date() {
     read -p "Enter day (DD): " d
 
+<<<<<<< HEAD
     if [ "$d" != "7" ]; then
+=======
+    if [ $d != 07 ]
+    then
+>>>>>>> eb3ea463d0a318b70a4ac586607364e83ffac582
         echo "Salary can only be generated on 7th"
         exit 1 
     fi
@@ -30,7 +33,7 @@ check_date() {
 
 
 calculate_salary() {
-
+    ATT_FILE="data/attendance/$USER_ID.csv"
     # check file exists
     if [ ! -f "$ATT_FILE" ]
     then
@@ -60,7 +63,9 @@ calculate_salary() {
 
 
 generate_payslip() {
-
+    MONTH=$(date +%B)
+    YEAR=$(date +%Y)
+    PAYSLIP_FILE="payslips/${USER_ID}_salary_${MONTH}_${YEAR}.txt"
     mkdir -p payslips
 
     
@@ -76,19 +81,24 @@ generate_payslip() {
         echo "Per Day Pay  : ₹$PER_DAY_SALARY"
         echo "Total Salary : ₹$salary"
         echo "---------------------------"
+<<<<<<< HEAD
     } > "$PAYSLIP_FILE"
     
     echo ""
     echo "----- Payslip Preview -----"
     cat "$PAYSLIP_FILE"
+=======
+    } | tee "$PAYSLIP_FILE"
+
+>>>>>>> eb3ea463d0a318b70a4ac586607364e83ffac582
 }
 
 
 # -------- MAIN PROGRAM --------
-echo "Processing Salary..."
-
-check_date
-calculate_salary
-generate_payslip
-
-echo "Done!"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "Processing Salary..."
+    check_date
+    calculate_salary
+    generate_payslip
+    echo "Done!"
+fi
