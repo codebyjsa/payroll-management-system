@@ -72,7 +72,7 @@ fi
 
 
         
-        if [[ $? -ne 0 ]]; then
+        if [[ -z "$ROLE" ]]; then
             echo " Invalid ID or Name. Try again!"
             continue
         fi
