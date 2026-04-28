@@ -7,30 +7,13 @@ source salary.sh
 source report.sh
 source admin.sh
 
-# --- MENU SYSTEM ---
+echo "========================================"
+echo "   PAYROLL MANAGEMENT SYSTEM STARTING   "
+echo "========================================"
 
-employee_menu() {
-    while true; do
-        echo -e "\n--- EMPLOYEE MENU (User: $USER_ID) ---"
-        echo "1. Mark Attendance"
-        echo "2. View Attendance"
-        echo "3. View Salary"
-        echo "4. Monthly Stats"
-        echo "5. Exit"
-        read -p "Select Option: " choice
+login_user
 
-        case $choice in
-            1) mark_attendance "$USER_ID" ;;
-            2) view_attendance "$USER_ID" ;;
-            3) calculate_salary ;;
-            4) calculate_monthly_stats ;;
-            5) echo "Logging out..."; break ;;
-            *) echo "Invalid option, try again." ;;
-        esac
-    done
-}
-
-admin_menu_main() {
+if [ "$USER_ROLE" == "admin" ]; then
     while true; do
         echo -e "\n--- ADMIN MENU (Admin: $USER_ID) ---"
         echo "1. Add User"
@@ -41,35 +24,71 @@ admin_menu_main() {
         echo "6. Exit"
         read -p "Select Option: " choice
 
-        case $choice in
-            1) add_user ;;
-            2) delete_user ;;
-            3) update_user ;;
-            4) view_all_records ;;
-            5) show_report ;;
-            6) echo "Logging out..."; break ;;
-            *) echo "Invalid option, try again." ;;
-        esac
+        if [ "$choice" == "1" ]; then
+            add_user
+        else
+            if [ "$choice" == "2" ]; then
+                delete_user
+            else
+                if [ "$choice" == "3" ]; then
+                    update_user
+                else
+                    if [ "$choice" == "4" ]; then
+                        view_all_records
+                    else
+                        if [ "$choice" == "5" ]; then
+                            show_report
+                        else
+                            if [ "$choice" == "6" ]; then
+                                echo "Logging out..."
+                                break
+                            else
+                                echo "Invalid option, try again."
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+        fi
     done
-}
-
-# --- STARTING THE SYSTEM ---
-
-echo "========================================"
-echo "   PAYROLL MANAGEMENT SYSTEM STARTING   "
-echo "========================================"
-
-# Step 1: Login
-login_user
-
-# Step 2: Routing based on role
-if [[ "$USER_ROLE" == "admin" ]]; then
-    admin_menu_main
-elif [[ "$USER_ROLE" == "employee" ]]; then
-    employee_menu
 else
-    echo "Login failed or unknown role. System exiting."
-    exit 1
+    if [ "$USER_ROLE" == "employee" ]; then
+        while true; do
+            echo -e "\n--- EMPLOYEE MENU (User: $USER_ID) ---"
+            echo "1. Mark Attendance"
+            echo "2. View Attendance"
+            echo "3. View Salary"
+            echo "4. Monthly Stats"
+            echo "5. Exit"
+            read -p "Select Option: " choice
+
+            if [ "$choice" == "1" ]; then
+                mark_attendance "$USER_ID"
+            else
+                if [ "$choice" == "2" ]; then
+                    view_attendance "$USER_ID"
+                else
+                    if [ "$choice" == "3" ]; then
+                        calculate_salary
+                    else
+                        if [ "$choice" == "4" ]; then
+                            calculate_monthly_stats
+                        else
+                            if [ "$choice" == "5" ]; then
+                                echo "Logging out..."
+                                break
+                            else
+                                echo "Invalid option, try again."
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+        done
+    else
+        echo "Login failed or unknown role. System exiting."
+        exit 1
+    fi
 fi
 
 echo "Thank you for using the system."

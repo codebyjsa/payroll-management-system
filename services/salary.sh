@@ -26,9 +26,6 @@ check_date() {
     fi
 }
 
-
-
-
 calculate_salary() {
 
     # check file exists
@@ -86,11 +83,10 @@ generate_payslip() {
 }
 
 
-# -------- MAIN PROGRAM --------
-echo "Processing Salary..."
-
-check_date
-calculate_salary
-generate_payslip
-
-echo "Done!"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "Processing Salary..."
+    check_date
+    calculate_salary
+    generate_payslip
+    echo "Done!"
+fi
