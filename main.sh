@@ -1,17 +1,16 @@
 #!/bin/bash
 
-cd "$(dirname "$0")/services" || exit 1
+cd services
+
 source auth.sh
 source attendance.sh
 source salary.sh
 source report.sh
 source admin.sh
 
-echo "========================================"
-echo "   PAYROLL MANAGEMENT SYSTEM STARTING   "
-echo "========================================"
 
 login_user
+
 
 if [ "$USER_ROLE" == "admin" ]; then
     while true; do
@@ -86,9 +85,9 @@ else
             fi
         done
     else
-        echo "Login failed or unknown role. System exiting."
-        exit 1
+        echo "Login failed or unknown role."
     fi
 fi
+
 
 echo "Thank you for using the system."
