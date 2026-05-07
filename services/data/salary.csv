@@ -4,3 +4,8 @@ user_id, month, total_salary
 1,April,1000
 
 2,April,1000
+1,April,1000
+<<<<<<< HEAD
+=======
+2,April,1500
+>>>>>>> eb3ea463d0a318b70a4ac586607364e83ffac582

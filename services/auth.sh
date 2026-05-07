@@ -50,7 +50,6 @@ do
 
     done < $file_location
 
-
     if [ $user_found -eq 1 ]
     then
         echo "Login successful!"
@@ -58,21 +57,20 @@ do
         echo "User name : $entered_name"
         echo "Role    : $matched_role"
 
+        # Only admin can exit system
         if [ "$matched_role" == "admin" ]
         then
             echo "Access granted (Admin)"
             echo "Admin can exit the system."
             break
 
+        elif [ "$matched_role" == "employee" ]
+        then
+            echo "Access granted (Employee)"
+            echo "Employee cannot exit the system."
+            echo " ======================================"
         else
-            if [ "$matched_role" == "employee" ]
-            then
-                echo "Access granted (Employee)"
-                echo "Employee cannot exit the system."
-
-            else
-                echo "Unknown role! Try again."
-            fi
+            echo "Unknown role! Try again."
         fi
 
     else
