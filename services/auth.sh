@@ -1,108 +1,82 @@
 #!/bin/bash
 
-# Base directory (services folder)
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "====== LOGIN SYSTEM ======"
 
-# Correct file path
-USER_FILE="$BASE_DIR/data/users.csv"
+keep_asking=1
 
-# Global variables
-USER_ID=""
-USER_ROLE=""
+while [ $keep_asking -eq 1 ]
+do
+    echo "Enter User ID : "
+    read entered_id
 
+    echo "Enter User Name: "
+    read entered_name
 
-check_user() {
-    local INPUT_ID="$1"
-    local INPUT_NAME="$2"
+    file_location="services/data/users.csv"
 
-    # Check file exists
-    if [[ ! -f "$USER_FILE" ]]; then
-        echo "[ERROR] User file not found!"
-        return 1
+    if [ ! -f "$file_location" ]
+    then
+        file_location="data/users.csv"
+
+        if [ ! -f "$file_location" ]
+        then
+            file_location="../data/users.csv"
+
+            if [ ! -f "$file_location" ]
+            then
+                echo "[ERROR] User file not found!"
+                exit 1
+            fi
+        fi
     fi
 
-    # Find record (skip header, remove spaces)
-    local RECORD
-    RECORD=$(tail -n +2 "$USER_FILE" | tr -d ' ' | grep "^${INPUT_ID},")
+    user_found=0
+    matched_role=""
 
-    # If ID not found
-    if [[ -z "$RECORD" ]]; then
-        return 1
-    fi
+    while read current_line
+    do
+        id_from_file=`echo "$current_line" | cut -d',' -f1`
+        name_from_file=`echo "$current_line" | cut -d',' -f2`
+        role_from_file=`echo "$current_line" | cut -d',' -f3`
 
-    # Extract fields
-    local ID NAME ROLE
-    IFS=',' read -r ID NAME ROLE <<< "$RECORD"
-
-    # Check name match
-    if [[ "$NAME" != "$INPUT_NAME" ]]; then
-        return 1
-    fi
-
-    # Return role
-    echo "$ROLE"
-    return 0
-}
-
-
-login_user() {
-    echo "====== LOGIN SYSTEM ======"
-
-    while true; do
-        echo -n "Enter User ID : "
-        read -r INPUT_ID
-        echo -n "Enter User Name: "
-        read -r INPUT_NAME
-        
-         # Check user
-        ROLE=$(check_user "$INPUT_ID" "$INPUT_NAME")
-        # if role == admin then ask for exit
-if [[ "$ROLE" == "admin" ]]; then
-    echo -n "Do you want to exit? (y/n): "
-    read -r CHOICE
-
-    if [[ "$CHOICE" == "y" ]]; then
-        return 0
-    fi
-fi
-
-        # Exit condition
-    
-
-
-
-        
-        if [[ $? -ne 0 ]]; then
-            echo " Invalid ID or Name. Try again!"
-            continue
+        if [ "$id_from_file" == "$entered_id" ]
+        then
+            if [ "$name_from_file" == "$entered_name" ]
+            then
+                user_found=1
+                matched_role="$role_from_file"
+            fi
         fi
 
-        # Save global values
-        USER_ID="$INPUT_ID"
-        USER_ROLE="$ROLE"
+    done < $file_location
 
+
+    if [ $user_found -eq 1 ]
+    then
         echo "Login successful!"
-        echo "User ID : $USER_ID"
-        echo "User name : $INPUT_NAME"
-        echo "Role    : $USER_ROLE"
+        echo "User ID : $entered_id"
+        echo "User name : $entered_name"
+        echo "Role    : $matched_role"
 
-        # Role check
-        if [[ "$USER_ROLE" == "admin" ]]; then
-            echo " Access granted (Admin)"
-            return 0
-
-        elif [[ "$USER_ROLE" == "employee" ]]; then
-            echo " Access granted (Employee)"
-            return 0
+        if [ "$matched_role" == "admin" ]
+        then
+            echo "Access granted (Admin)"
+            echo "Admin can exit the system."
+            break
 
         else
-            echo " Unknown role! Try again."
-            continue
-        fi
-    done
-}
+            if [ "$matched_role" == "employee" ]
+            then
+                echo "Access granted (Employee)"
+                echo "Employee cannot exit the system."
 
-# -------------------------------
-# MAIN
-# -------------------------------
-login_user
+            else
+                echo "Unknown role! Try again."
+            fi
+        fi
+
+    else
+        echo "Invalid ID or Name. Try again!"
+    fi
+
+done
