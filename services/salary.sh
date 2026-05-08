@@ -1,77 +1,90 @@
 #!/bin/bash
 
-PER_DAY_SALARY=500
+# per day salary
+pay=500
 
-calculate_salary() {
-    ATT_FILE="data/attendance/$USER_ID.csv"
-    SAL_FILE="data/salary.csv"
+echo "Enter User ID: "
+read USER_ID
 
-    # count present days (P)
-    present=$(grep -c "P" "$ATT_FILE")
+echo "Enter day (DD): "
+read d
 
-    # total days (remove header)
-    total=$(wc -l < "$ATT_FILE")
-    total=$((total - 1))
-
-    # absent days
-    absent=$((total - present))
-
-    # salary calculation
-    salary=$((present * PER_DAY_SALARY))
-
-    # current month
-    month=$(date +%B)
-
-    # store in salary.csv
-    echo "$USER_ID,$month,$salary" >> "$SAL_FILE"
-}
-
-check_date() {
-    read -p "Enter day (DD): " d
-
-    if [ "$d" != "7" ]; then
-        echo "Salary can only be generated on 7th"
-        exit 1
+if [ "$d" == "7" ]; then
+  # check user in users file
+  user_found=0
+  for row in $(cat data/users.csv); do
+    id=$(echo $row | cut -d',' -f1)
+    if [ "$id" == "$USER_ID" ]; then
+      user_found=1
+      user_role=$(echo $row | cut -d',' -f3)
     fi
-}
+  done
 
-generate_payslip() {
-    MONTH=$(date +%B)
-    YEAR=$(date +%Y)
-    PAYSLIP_FILE="payslips/${USER_ID}_salary_${MONTH}_${YEAR}.txt"
-    mkdir -p payslips
-
-    # Just get user role
-    USER_ROLE=$(grep "^$USER_ID," data/users.csv | cut -d',' -f3)
-
-    {
-        echo "---------------------------"
-        echo "        PAYSLIP            "
-        echo "---------------------------"
-        echo "User ID      : $USER_ID"
-        echo "User Role    : $USER_ROLE"
-        echo "Present Days : $present"
-        echo "Absent Days  : $absent"
-        echo "Per Day Pay  : ₹$PER_DAY_SALARY"
-        echo "Total Salary : ₹$salary"
-        echo "---------------------------"
-    } > "$PAYSLIP_FILE"
-    
-    echo ""
-    echo "----- Payslip Preview -----"
-    cat "$PAYSLIP_FILE"
-}
-
-
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    read -p "Enter User ID: " USER_ID
-    
-    USER_ROLE=$(grep "^$USER_ID," data/users.csv | cut -d',' -f3)
-
-
+  if [ $user_found -eq 1 ]; then
     echo "Processing Salary..."
-    check_date
-    calculate_salary
-    generate_payslip
-    echo "Done!"
+    
+    file="data/attendance/$USER_ID.csv"
+    if [ -f "$file" ]; then
+      present=0
+      absent=0
+      
+      for a in $(cat $file); do
+        if [ "$a" == "Date,Status" ]; then
+          # do nothing for header
+          x=1
+        else
+          s=$(echo $a | cut -d',' -f2)
+          if [ "$s" == "P" ]; then
+            present=$(expr $present + 1)
+          else
+            if [ "$s" == "A" ]; then
+              absent=$(expr $absent + 1)
+            else
+              # if anything else just ignore
+              x=2
+            fi
+          fi
+        fi
+      done
+      
+      salary=$(expr $present \* $pay)
+      
+      m=$(date +%B)
+      y=$(date +%Y)
+      
+      echo "$USER_ID,$m,$salary" >> data/salary.csv
+      
+      if [ -d "payslips" ]; then
+        x=3
+      else
+        mkdir payslips
+      fi
+      
+      slip="payslips/${USER_ID}_salary_${m}_${y}.txt"
+      
+      echo "---------------------------" > $slip
+      echo "        PAYSLIP            " >> $slip
+      echo "---------------------------" >> $slip
+      echo "User ID      : $USER_ID" >> $slip
+      echo "User Role    : $user_role" >> $slip
+      echo "Present Days : $present" >> $slip
+      echo "Absent Days  : $absent" >> $slip
+      echo "Per Day Pay  : ₹500" >> $slip
+      echo "Total Salary : ₹$salary" >> $slip
+      echo "---------------------------" >> $slip
+      
+      echo ""
+      echo "----- Payslip Preview -----"
+      cat $slip
+      echo "Done!"
+    else
+      echo "attendance file not found"
+    fi
+  else
+    echo "user id is wrong"
+  fi
+else
+  if [ "$d" != "7" ]; then
+    echo "Salary can only be generated on 7th"
+  fi
 fi
