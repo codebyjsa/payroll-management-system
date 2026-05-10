@@ -1,102 +1,53 @@
-ATTENDANCE_DIR="data/attendance"
+#!/bin/bash
 
-mkdir -p "$ATTENDANCE_DIR"
+mkdir -p attendance_data
 
+echo "1. Mark Attendance"
+echo "2. Show Summary"
+echo "Enter your choice:"
+read choice
 
-mark_attendance() {
-    local USER_ID="$1"
+if [ "$choice" = "1" ]
+then
+    echo "Enter Employee ID:"
+    read empid
 
-    if [[ -z "$USER_ID" ]]; then
-        echo "[ERROR] USER_ID is required."
-        echo "Usage: mark_attendance <USER_ID>"
-        return 1
-    fi
+    date=$(date +"%Y-%m-%d")
+    time=$(date +"%H:%M:%S")
 
-    local FILE="$ATTENDANCE_DIR/${USER_ID}.csv"
-    local CURRENT_DATE
-    local CURRENT_TIME
-    CURRENT_DATE=$(date +"%Y-%m-%d")
-    CURRENT_TIME=$(date +"%H:%M:%S")
+    file="attendance_data/$empid.csv"
 
-    if [[ ! -f "$FILE" ]]; then
-        echo "Date,Time,Status" > "$FILE"
-        echo "[INFO] Created new attendance file for user: $USER_ID"
-    fi
+if [ ! -e "$file" ]
+then
+    echo "Date,Time,Status" > "$file"
+fi
 
-    if grep -q "^${CURRENT_DATE}," "$FILE" 2>/dev/null; then
-        echo " Attendance already marked for $USER_ID"
-        echo " Date : $CURRENT_DATE"
-        
-        local EXISTING
-        EXISTING=$(grep "^${CURRENT_DATE}," "$FILE")
-        echo " Record: $EXISTING"
-        return 0
-    fi
+check=$(grep "$date" "$file")
 
-    echo "  Mark Attendance"
-    echo "  User   : $USER_ID"
-    echo "  Date   : $CURRENT_DATE"
-    echo "  Time   : $CURRENT_TIME"
-    echo "Enter Status:"
-    echo "  1) Present"
-    echo "  2) Absent"
-    printf "Your choice [1/2]: "
-    read -r CHOICE
+if [ "$check" != "" ]
+then
+    echo "Attendance already marked for today"
 
-    local STATUS
-    case "$CHOICE" in
-        1) STATUS="Present" ;;
-        2) STATUS="Absent"  ;;
-        *)
-            echo "[ERROR] Invalid choice. Please enter 1 for Present or 2 for Absent."
-            return 1
-            ;;
-    esac
-
-    echo "${CURRENT_DATE},${CURRENT_TIME},${STATUS}" >> "$FILE"
-
-    echo " [SUCCESS] Attendance marked!"
-    echo "  User   : $USER_ID"
-    echo "  Date   : $CURRENT_DATE"
-    echo "  Time   : $CURRENT_TIME"
-    echo "  Status : $STATUS"
-    return 0
-}
+else
+    echo "$date,$time,Present" >> "$file"
+    echo "Attendance marked successfully"
+fi
 
 
-view_attendance() {
-    local USER_ID="$1"
+elif [ "$choice" = "2" ]
+then
+    echo "Enter Employee ID:"
+    read empid
 
-    # Validate USER_ID
-    if [[ -z "$USER_ID" ]]; then
-        echo "[ERROR] USER_ID is required."
-        echo "Usage: view_attendance <USER_ID>"
-        return 1
-    fi
+    file="attendance_data/$empid.csv"
 
-    local FILE="$ATTENDANCE_DIR/${USER_ID}.csv"
+    present=$(grep "Present" "$file")
 
-  
-    if [[ ! -f "$FILE" ]]; then
-        echo "[INFO] No attendance records found for user: $USER_ID"
-        return 0
-    fi
+    total=$(echo "$present" | wc -l)
 
-    local TOTAL PRESENT ABSENT
-    TOTAL=$(tail -n +2 "$FILE" | wc -l | tr -d ' ')
-    PRESENT=$(tail -n +2 "$FILE" | grep -c ",Present$" || true)
-    ABSENT=$(tail -n +2 "$FILE" | grep -c ",Absent$" || true)
+    echo "Employee ID : $empid"
+    echo "Total Present : $total"
 
-    echo "  Attendance Report — User: $USER_ID"
-    printf "%-15s %-12s %-10s\n" "Date" "Time" "Status"
-
-    while IFS=',' read -r DATE TIME STATUS; do
-        printf "%-15s %-12s %-10s\n" "$DATE" "$TIME" "$STATUS"
-    done < <(tail -n +2 "$FILE")
-
-    echo "  Summary:"
-    echo "    Total Days Recorded : $TOTAL"
-    echo "    Present             : $PRESENT"
-    echo "    Absent              : $ABSENT"
-    return 0
-}
+else
+    echo "Invalid Choice"
+fi
