@@ -21,7 +21,8 @@ if [ "$USER_ROLE" == "admin" ]; then
         echo "4. View All Records"
         echo "5. Salary Report"
         echo "6. Exit"
-        read -p "Select Option: " choice
+        echo "Select Option: "
+        read choice
 
         if [ "$choice" == "1" ]; then
             add_user
@@ -59,13 +60,14 @@ else
             echo "3. View Salary"
             echo "4. Monthly Stats"
             echo "5. Exit"
-            read -p "Select Option: " choice
+            echo "Select Option: "
+            read choice
 
             if [ "$choice" == "1" ]; then
-                mark_attendance "$USER_ID"
+                mark_attendance
             else
                 if [ "$choice" == "2" ]; then
-                    view_attendance "$USER_ID"
+                    view_attendance
                 else
                     if [ "$choice" == "3" ]; then
                         calculate_salary

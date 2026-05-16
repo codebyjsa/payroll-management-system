@@ -1,53 +1,37 @@
 #!/bin/bash
 
-mkdir -p attendance_data
-
-echo "1. Mark Attendance"
-echo "2. Show Summary"
-echo "Enter your choice:"
-read choice
-
-if [ "$choice" = "1" ]
-then
-    echo "Enter Employee ID:"
-    read empid
+mark_attendance() {
+    empid=$USER_ID
+    file="data/attendance/$empid.csv"
 
     date=$(date +"%Y-%m-%d")
     time=$(date +"%H:%M:%S")
 
-    file="attendance_data/$empid.csv"
+    if [ ! -e "$file" ]; then
+        mkdir -p data/attendance
+        echo "date, time, status" > "$file"
+    fi
 
-if [ ! -e "$file" ]
-then
-    echo "Date,Time,Status" > "$file"
-fi
+    check=$(grep "$date" "$file")
 
-check=$(grep "$date" "$file")
+    if [ "$check" != "" ]; then
+        echo "Attendance already marked for today"
+    else
+        echo "$date,$time,Present" >> "$file"
+        echo "Attendance marked successfully"
+    fi
+}
 
-if [ "$check" != "" ]
-then
-    echo "Attendance already marked for today"
+view_attendance() {
+    empid=$USER_ID
+    file="data/attendance/$empid.csv"
 
-else
-    echo "$date,$time,Present" >> "$file"
-    echo "Attendance marked successfully"
-fi
+    total_days=$(tail -n +2 "$file" | wc -l)
+    present=$(grep -c ",Present$" "$file")
+    absent=$(grep -c ",Absent$" "$file")
 
-
-elif [ "$choice" = "2" ]
-then
-    echo "Enter Employee ID:"
-    read empid
-
-    file="attendance_data/$empid.csv"
-
-    present=$(grep "Present" "$file")
-
-    total=$(echo "$present" | wc -l)
-
-    echo "Employee ID : $empid"
-    echo "Total Present : $total"
-
-else
-    echo "Invalid Choice"
-fi
+    echo "Employee ID   : $empid"
+    echo "Total Days    : $total_days"
+    echo "Total Present : $present"
+    echo "Total Absent  : $absent"
+}

@@ -6,9 +6,7 @@ login_user() {
     echo "========================================"
     echo "====== LOGIN SYSTEM ======"
 
-    keep_asking=1
-
-    while [ $keep_asking -eq 1 ]
+    while true
     do
         echo "Enter User ID : "
         read entered_id
@@ -22,7 +20,7 @@ login_user() {
         user_found=0
         matched_role=""
 
-        while read current_line
+        for current_line in $(cat $file_location)
         do
             id_from_file=`echo "$current_line" | cut -d',' -f1`
             name_from_file=`echo "$current_line" | cut -d',' -f2`
@@ -36,8 +34,7 @@ login_user() {
                     matched_role="$role_from_file"
                 fi
             fi
-
-        done < $file_location
+        done
 
         if [ $user_found -eq 1 ]
         then

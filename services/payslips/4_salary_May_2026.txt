@@ -1,0 +1,10 @@
+---------------------------
+        PAYSLIP            
+---------------------------
+User ID      : 4
+User Role    : employee
+Present Days : 1
+Absent Days  : 0
+Per Day Pay  : ₹500
+Total Salary : ₹500
+---------------------------
